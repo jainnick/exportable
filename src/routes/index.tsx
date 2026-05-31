@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getUserName, setUserName, getSessionId } from "@/lib/pdfx";
+import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PDF Extract — AI-powered PDF data extraction" },
+      { title: "DocuExtract AI — AI-powered PDF data extraction" },
       { name: "description", content: "Extract structured data from PDFs in seconds using Groq AI. No signup, just your name." },
-      { property: "og:title", content: "PDF Extract — AI-powered PDF data extraction" },
+      { property: "og:title", content: "DocuExtract AI — AI-powered PDF data extraction" },
       { property: "og:description", content: "Extract structured data from PDFs in seconds using Groq AI." },
     ],
   }),
@@ -43,6 +44,7 @@ function Welcome() {
     <main className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-5xl grid lg:grid-cols-2 gap-10 items-center">
         <div className="space-y-6">
+          <img src={logo} alt="DocuExtract AI" className="h-20 w-20 rounded-2xl shadow-md" />
           <span className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
             AI-powered PDF extraction

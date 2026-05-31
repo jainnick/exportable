@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, KeyRound, Play, ShieldCheck, Sparkles, LogOut } from "lucide-react";
+import { AlertTriangle, KeyRound, Play, ShieldCheck, LogOut } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,7 +26,7 @@ import type { ResultRow } from "@/lib/exports";
 export const Route = createFileRoute("/workspace")({
   head: () => ({
     meta: [
-      { title: "Workspace — PDF Extract" },
+      { title: "Workspace — DocuExtract AI" },
       { name: "description", content: "Upload PDFs, choose a Groq model, and run AI extraction." },
     ],
   }),
@@ -219,11 +220,9 @@ function Workspace() {
       <header className="border-b bg-card/70 backdrop-blur">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl gradient-bg flex items-center justify-center shadow-md">
-              <Sparkles className="h-4 w-4 text-primary-foreground" />
-            </div>
+            <img src={logo} alt="DocuExtract AI" className="h-10 w-10 rounded-xl shadow-md" />
             <div>
-              <p className="font-semibold leading-tight">PDF Extract</p>
+              <p className="font-semibold leading-tight">DocuExtract AI</p>
               <p className="text-xs text-muted-foreground">Hi, {name}</p>
             </div>
           </div>
