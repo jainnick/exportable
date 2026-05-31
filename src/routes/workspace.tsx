@@ -331,6 +331,10 @@ function Workspace() {
               )}
             </div>
 
+            <ProofCard />
+
+
+
             <div className="card-soft p-5 sm:p-6">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold">Recent extractions</h2>
