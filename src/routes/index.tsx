@@ -1,29 +1,98 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Sparkles, FileSearch, Wand2, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { getUserName, setUserName, getSessionId } from "@/lib/pdfx";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "PDF Extract — AI-powered PDF data extraction" },
+      { name: "description", content: "Extract structured data from PDFs in seconds using Groq AI. No signup, just your name." },
+      { property: "og:title", content: "PDF Extract — AI-powered PDF data extraction" },
+      { property: "og:description", content: "Extract structured data from PDFs in seconds using Groq AI." },
     ],
   }),
-  component: Index,
+  component: Welcome,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Welcome() {
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [touched, setTouched] = useState(false);
+
+  useEffect(() => {
+    const existing = getUserName();
+    if (existing) setName(existing);
+  }, []);
+
+  const valid = name.trim().length >= 2;
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setTouched(true);
+    if (!valid) return;
+    setUserName(name.trim());
+    getSessionId(); // ensure session exists
+    navigate({ to: "/workspace" });
+  };
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="min-h-screen flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-5xl grid lg:grid-cols-2 gap-10 items-center">
+        <div className="space-y-6">
+          <span className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            AI-powered PDF extraction
+          </span>
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight">
+            Turn messy PDFs into <span className="gradient-text">clean, exportable data</span>.
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Drop in your PDFs, pick a model, and get a tidy table of extracted fields. No accounts, no fuss — just your name to get started.
+          </p>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li className="flex items-start gap-2"><FileSearch className="h-4 w-4 mt-0.5 text-primary" /> Upload multiple PDFs at once</li>
+            <li className="flex items-start gap-2"><Wand2 className="h-4 w-4 mt-0.5 text-primary" /> Choose between fast or high-quality Groq models</li>
+            <li className="flex items-start gap-2"><Sparkles className="h-4 w-4 mt-0.5 text-primary" /> Export results to CSV, Excel, or PDF</li>
+          </ul>
+        </div>
+
+        <form onSubmit={onSubmit} className="card-soft p-7 sm:p-9">
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold">Welcome 👋</h2>
+            <p className="text-sm text-muted-foreground mt-1">What should we call you?</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="name">Your name</Label>
+            <Input
+              id="name"
+              autoFocus
+              maxLength={60}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Alex Johnson"
+              className="h-12 text-base"
+            />
+            {touched && !valid && (
+              <p className="text-xs text-destructive">Please enter at least 2 characters.</p>
+            )}
+          </div>
+          <Button
+            type="submit"
+            size="lg"
+            className="mt-6 w-full gradient-bg text-primary-foreground shadow-md hover:opacity-95"
+          >
+            Continue
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+          <p className="text-xs text-muted-foreground mt-4 text-center">
+            We don't ask for email or password. Your name stays on this device.
+          </p>
+        </form>
+      </div>
+    </main>
   );
 }
