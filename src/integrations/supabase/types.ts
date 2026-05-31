@@ -14,7 +14,125 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      document_runs: {
+        Row: {
+          api_key_mode: string
+          created_at: string
+          id: string
+          model_name: string
+          model_provider: string
+          pdf_name: string
+          pdf_storage_path: string | null
+          session_id: string
+          status: string
+          user_name: string
+        }
+        Insert: {
+          api_key_mode: string
+          created_at?: string
+          id?: string
+          model_name: string
+          model_provider?: string
+          pdf_name: string
+          pdf_storage_path?: string | null
+          session_id: string
+          status?: string
+          user_name: string
+        }
+        Update: {
+          api_key_mode?: string
+          created_at?: string
+          id?: string
+          model_name?: string
+          model_provider?: string
+          pdf_name?: string
+          pdf_storage_path?: string | null
+          session_id?: string
+          status?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
+      extraction_results: {
+        Row: {
+          created_at: string
+          id: string
+          parameter_1: string | null
+          parameter_10: string | null
+          parameter_11: string | null
+          parameter_12: string | null
+          parameter_13: string | null
+          parameter_2: string | null
+          parameter_3: string | null
+          parameter_4: string | null
+          parameter_5: string | null
+          parameter_6: string | null
+          parameter_7: string | null
+          parameter_8: string | null
+          parameter_9: string | null
+          pdf_name: string
+          raw_response: Json | null
+          run_id: string
+          session_id: string
+          user_name: string
+          user_pdf_key: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          parameter_1?: string | null
+          parameter_10?: string | null
+          parameter_11?: string | null
+          parameter_12?: string | null
+          parameter_13?: string | null
+          parameter_2?: string | null
+          parameter_3?: string | null
+          parameter_4?: string | null
+          parameter_5?: string | null
+          parameter_6?: string | null
+          parameter_7?: string | null
+          parameter_8?: string | null
+          parameter_9?: string | null
+          pdf_name: string
+          raw_response?: Json | null
+          run_id: string
+          session_id: string
+          user_name: string
+          user_pdf_key: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          parameter_1?: string | null
+          parameter_10?: string | null
+          parameter_11?: string | null
+          parameter_12?: string | null
+          parameter_13?: string | null
+          parameter_2?: string | null
+          parameter_3?: string | null
+          parameter_4?: string | null
+          parameter_5?: string | null
+          parameter_6?: string | null
+          parameter_7?: string | null
+          parameter_8?: string | null
+          parameter_9?: string | null
+          pdf_name?: string
+          raw_response?: Json | null
+          run_id?: string
+          session_id?: string
+          user_name?: string
+          user_pdf_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extraction_results_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "document_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
