@@ -165,10 +165,11 @@ function Workspace() {
         });
         if (resErr) throw new Error(resErr.message);
 
-        await supabase
-          .from("document_runs")
-          .update({ status: "complete" })
-          .eq("id", runRow.id);
+        await supabase.rpc("update_run_status", {
+          p_run_id: runRow.id,
+          p_session_id: sessionId,
+          p_status: "complete",
+        });
 
         updateRun(run.id, { status: "complete" });
 
