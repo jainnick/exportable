@@ -55,8 +55,14 @@ export type Database = {
       }
       extraction_results: {
         Row: {
+          access_score: string | null
+          age: string | null
+          api_key_mode: string | null
           created_at: string
           id: string
+          initial_authorization_duration_in_months: string | null
+          number_of_steps_through_brands: string | null
+          number_of_steps_through_generic: string | null
           parameter_1: string | null
           parameter_10: string | null
           parameter_11: string | null
@@ -71,15 +77,34 @@ export type Database = {
           parameter_8: string | null
           parameter_9: string | null
           pdf_name: string
+          pdf_storage_path: string | null
+          quantity_limits: string | null
           raw_response: Json | null
+          reauthorization_duration_in_months: string | null
+          reauthorization_required: string | null
+          reauthorization_requirements_documented_in_policy: string | null
           run_id: string
+          selected_model: string | null
           session_id: string
+          specialist_types: string | null
+          status: string
+          step_therapy_requirements_documented_in_policy: string | null
+          step_through_phototherapy: string | null
+          tb_test_required: string | null
           user_name: string
+          user_name_display: string | null
+          user_name_key: string | null
           user_pdf_key: string
         }
         Insert: {
+          access_score?: string | null
+          age?: string | null
+          api_key_mode?: string | null
           created_at?: string
           id?: string
+          initial_authorization_duration_in_months?: string | null
+          number_of_steps_through_brands?: string | null
+          number_of_steps_through_generic?: string | null
           parameter_1?: string | null
           parameter_10?: string | null
           parameter_11?: string | null
@@ -94,15 +119,34 @@ export type Database = {
           parameter_8?: string | null
           parameter_9?: string | null
           pdf_name: string
+          pdf_storage_path?: string | null
+          quantity_limits?: string | null
           raw_response?: Json | null
+          reauthorization_duration_in_months?: string | null
+          reauthorization_required?: string | null
+          reauthorization_requirements_documented_in_policy?: string | null
           run_id: string
+          selected_model?: string | null
           session_id: string
+          specialist_types?: string | null
+          status?: string
+          step_therapy_requirements_documented_in_policy?: string | null
+          step_through_phototherapy?: string | null
+          tb_test_required?: string | null
           user_name: string
+          user_name_display?: string | null
+          user_name_key?: string | null
           user_pdf_key: string
         }
         Update: {
+          access_score?: string | null
+          age?: string | null
+          api_key_mode?: string | null
           created_at?: string
           id?: string
+          initial_authorization_duration_in_months?: string | null
+          number_of_steps_through_brands?: string | null
+          number_of_steps_through_generic?: string | null
           parameter_1?: string | null
           parameter_10?: string | null
           parameter_11?: string | null
@@ -117,10 +161,23 @@ export type Database = {
           parameter_8?: string | null
           parameter_9?: string | null
           pdf_name?: string
+          pdf_storage_path?: string | null
+          quantity_limits?: string | null
           raw_response?: Json | null
+          reauthorization_duration_in_months?: string | null
+          reauthorization_required?: string | null
+          reauthorization_requirements_documented_in_policy?: string | null
           run_id?: string
+          selected_model?: string | null
           session_id?: string
+          specialist_types?: string | null
+          status?: string
+          step_therapy_requirements_documented_in_policy?: string | null
+          step_through_phototherapy?: string | null
+          tb_test_required?: string | null
           user_name?: string
+          user_name_display?: string | null
+          user_name_key?: string | null
           user_pdf_key?: string
         }
         Relationships: [
