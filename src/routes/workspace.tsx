@@ -161,7 +161,7 @@ function Workspace() {
           pdf_name: run.file.name,
           user_pdf_key: run.pdfKey,
           ...parameters,
-          raw_response,
+          raw_response: raw_response as any,
         });
         if (resErr) throw new Error(resErr.message);
 
