@@ -16,7 +16,7 @@ import { ResultsTable } from "@/components/pdfx/ResultsTable";
 import { StatusBadge } from "@/components/pdfx/StatusBadge";
 import {
   clearSession, getSessionId, getUserName,
-  GROQ_MODELS, makePdfKey,
+  GROQ_MODELS, makePdfKey, normalizeName,
   type ApiKeyMode, type GroqModel, type RunStatus,
 } from "@/lib/pdfx";
 import { processPdf } from "@/lib/process-pdf";
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/workspace")({
 });
 
 interface RunItem {
-  id: string;          // local id
+  id: string;
   file: File;
   pdfKey: string;
   status: RunStatus;
@@ -44,6 +44,7 @@ interface RunItem {
 function Workspace() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
+  const [userNameKey, setUserNameKey] = useState("");
   const [sessionId, setSessionIdState] = useState("");
 
   const [files, setFiles] = useState<File[]>([]);
@@ -56,7 +57,6 @@ function Workspace() {
   const [processing, setProcessing] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(true);
 
-  // Bootstrap: require name
   useEffect(() => {
     const n = getUserName();
     if (!n) {
@@ -64,24 +64,24 @@ function Workspace() {
       return;
     }
     setName(n);
+    setUserNameKey(normalizeName(n));
     setSessionIdState(getSessionId());
   }, [navigate]);
 
-  // Load historical results for this session
+  // Load historical results scoped to the user (not just this session).
   useEffect(() => {
-    if (!sessionId) return;
+    if (!userNameKey) return;
     (async () => {
       const { data, error } = await supabase
         .from("extraction_results")
-        .select("user_name,pdf_name,user_pdf_key,parameter_1,parameter_2,parameter_3,parameter_4,parameter_5,parameter_6,parameter_7,parameter_8,parameter_9,parameter_10,parameter_11,parameter_12,parameter_13,created_at")
-        .eq("session_id", sessionId)
-        .order("created_at", { ascending: false });
-      if (!error && data) {
-        setResults(data.map((r) => ({ ...r, status: "complete" } as ResultRow)));
-      }
+        .select("*")
+        .eq("user_name_key", userNameKey)
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (!error && data) setResults(data as ResultRow[]);
       setLoadingHistory(false);
     })();
-  }, [sessionId]);
+  }, [userNameKey]);
 
   const step: 0 | 1 | 2 | 3 = useMemo(() => {
     if (results.length > 0 && !processing) return 3;
@@ -105,7 +105,7 @@ function Workspace() {
     const initial: RunItem[] = files.map((f) => ({
       id: crypto.randomUUID(),
       file: f,
-      pdfKey: makePdfKey(sessionId, f.name),
+      pdfKey: makePdfKey(userNameKey, f.name),
       status: "ready",
     }));
     setRuns(initial);
@@ -115,7 +115,6 @@ function Workspace() {
 
     for (const run of initial) {
       try {
-        // 1. Upload to Storage
         updateRun(run.id, { status: "uploading" });
         const path = `${sessionId}/${Date.now()}-${run.pdfKey}.pdf`;
         const { error: upErr } = await supabase.storage
@@ -123,7 +122,6 @@ function Workspace() {
           .upload(path, run.file, { contentType: "application/pdf", upsert: false });
         if (upErr) throw new Error(upErr.message);
 
-        // 2. Insert run record
         const { data: runRow, error: runErr } = await supabase
           .from("document_runs")
           .insert({
@@ -140,11 +138,11 @@ function Workspace() {
           .single();
         if (runErr || !runRow) throw new Error(runErr?.message ?? "Failed to create run");
 
-        // 3. Extract via /api/process-pdf (placeholder)
         updateRun(run.id, { status: "extracting" });
-        const { parameters, raw_response } = await processPdf({
+        const { fields, raw_response } = await processPdf({
           sessionId,
-          userName: name,
+          userNameDisplay: name,
+          userNameKey,
           pdfName: run.file.name,
           pdfStoragePath: path,
           userPdfKey: run.pdfKey,
@@ -153,17 +151,23 @@ function Workspace() {
           ownApiKey: apiKeyMode === "own" ? ownKey : undefined,
         });
 
-        // 4. Save extraction
         updateRun(run.id, { status: "saving" });
-        const { error: resErr } = await supabase.from("extraction_results").insert({
+        const insertRow: any = {
           run_id: runRow.id,
           session_id: sessionId,
           user_name: name,
+          user_name_display: name,
+          user_name_key: userNameKey,
           pdf_name: run.file.name,
           user_pdf_key: run.pdfKey,
-          ...parameters,
+          pdf_storage_path: path,
+          selected_model: model,
+          api_key_mode: apiKeyMode,
+          status: "complete",
           raw_response: raw_response as any,
-        });
+          ...fields,
+        };
+        const { error: resErr } = await supabase.from("extraction_results").insert(insertRow);
         if (resErr) throw new Error(resErr.message);
 
         await supabase.rpc("update_run_status", {
@@ -175,23 +179,7 @@ function Workspace() {
         updateRun(run.id, { status: "complete" });
 
         const newRow: ResultRow = {
-          user_name: name,
-          pdf_name: run.file.name,
-          user_pdf_key: run.pdfKey,
-          parameter_1: parameters.parameter_1 ?? null,
-          parameter_2: parameters.parameter_2 ?? null,
-          parameter_3: parameters.parameter_3 ?? null,
-          parameter_4: parameters.parameter_4 ?? null,
-          parameter_5: parameters.parameter_5 ?? null,
-          parameter_6: parameters.parameter_6 ?? null,
-          parameter_7: parameters.parameter_7 ?? null,
-          parameter_8: parameters.parameter_8 ?? null,
-          parameter_9: parameters.parameter_9 ?? null,
-          parameter_10: parameters.parameter_10 ?? null,
-          parameter_11: parameters.parameter_11 ?? null,
-          parameter_12: parameters.parameter_12 ?? null,
-          parameter_13: parameters.parameter_13 ?? null,
-          status: "complete",
+          ...insertRow,
           created_at: new Date().toISOString(),
         };
         setResults((prev) => [newRow, ...prev]);
@@ -203,7 +191,6 @@ function Workspace() {
     }
 
     setProcessing(false);
-    // Clear key from memory immediately after processing
     if (apiKeyMode === "own") setOwnKey("");
     toast.success("Processing complete");
   };
@@ -216,7 +203,6 @@ function Workspace() {
 
   return (
     <main className="min-h-screen">
-      {/* Header */}
       <header className="border-b bg-card/70 backdrop-blur">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -236,7 +222,6 @@ function Workspace() {
         <Stepper current={step} />
 
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          {/* LEFT: Upload + Model */}
           <section className="card-soft p-5 sm:p-6 space-y-6">
             <div>
               <h2 className="text-lg font-semibold">1. Upload your PDFs</h2>
@@ -286,20 +271,8 @@ function Workspace() {
                 onValueChange={(v) => setApiKeyMode(v as ApiKeyMode)}
                 className="grid sm:grid-cols-2 gap-3"
               >
-                <KeyModeCard
-                  value="app"
-                  selected={apiKeyMode === "app"}
-                  title="Use app key"
-                  desc="Quick start, no setup."
-                  icon={<ShieldCheck className="h-4 w-4" />}
-                />
-                <KeyModeCard
-                  value="own"
-                  selected={apiKeyMode === "own"}
-                  title="Use my own key"
-                  desc="Best for heavy usage."
-                  icon={<KeyRound className="h-4 w-4" />}
-                />
+                <KeyModeCard value="app" selected={apiKeyMode === "app"} title="Use app key" desc="Quick start, no setup." icon={<ShieldCheck className="h-4 w-4" />} />
+                <KeyModeCard value="own" selected={apiKeyMode === "own"} title="Use my own key" desc="Best for heavy usage." icon={<KeyRound className="h-4 w-4" />} />
               </RadioGroup>
 
               {apiKeyMode === "app" && (
@@ -316,37 +289,24 @@ function Workspace() {
               {apiKeyMode === "own" && (
                 <div className="mt-3 space-y-2">
                   <Label htmlFor="own-key">Your Groq API key</Label>
-                  <Input
-                    id="own-key"
-                    type="password"
-                    autoComplete="off"
-                    placeholder="gsk_..."
-                    value={ownKey}
-                    onChange={(e) => setOwnKey(e.target.value)}
-                  />
+                  <Input id="own-key" type="password" autoComplete="off" placeholder="gsk_..." value={ownKey} onChange={(e) => setOwnKey(e.target.value)} />
                   <p className="text-xs text-muted-foreground">
-                    Used only for this processing request. Never stored.
+                    Your API key will be used only for this extraction request and will not be displayed again.
                   </p>
                 </div>
               )}
             </div>
 
-            <Button
-              size="lg"
-              disabled={!canStart}
-              onClick={onStart}
-              className="w-full gradient-bg text-primary-foreground shadow-md hover:opacity-95"
-            >
+            <Button size="lg" disabled={!canStart} onClick={onStart} className="w-full gradient-bg text-primary-foreground shadow-md hover:opacity-95">
               <Play className="h-4 w-4" />
-              {processing ? "Processing…" : "Start processing"}
+              {processing ? "Running Extraction Engine…" : "Start processing"}
             </Button>
           </section>
 
-          {/* RIGHT: Processing + Recent */}
           <section className="space-y-4">
             <div className="card-soft p-5 sm:p-6">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-semibold">Processing status</h2>
+                <h2 className="text-lg font-semibold">Extraction Engine status</h2>
                 {processing && <StatusBadge status="processing" />}
               </div>
 
@@ -370,9 +330,7 @@ function Workspace() {
               </div>
               {loadingHistory ? (
                 <div className="space-y-2">
-                  {[0, 1, 2].map((i) => (
-                    <div key={i} className="h-10 rounded-lg bg-muted animate-pulse" />
-                  ))}
+                  {[0, 1, 2].map((i) => <div key={i} className="h-10 rounded-lg bg-muted animate-pulse" />)}
                 </div>
               ) : results.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Nothing yet. Your processed PDFs will appear here.</p>
@@ -382,7 +340,10 @@ function Workspace() {
                     <li key={r.user_pdf_key} className="py-2 flex items-center gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{r.pdf_name}</p>
-                        <p className="text-xs text-muted-foreground font-mono truncate">{r.user_pdf_key}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {r.selected_model && <span className="font-mono">{r.selected_model}</span>}
+                          {r.access_score && <> · Access <span className="font-semibold text-primary">{r.access_score}</span></>}
+                        </p>
                       </div>
                       <StatusBadge status={r.status} />
                     </li>
@@ -393,16 +354,13 @@ function Workspace() {
           </section>
         </div>
 
-        {/* Results */}
         <ResultsTable rows={results} onProcessMore={onProcessMore} />
       </div>
     </main>
   );
 }
 
-function KeyModeCard({
-  value, selected, title, desc, icon,
-}: { value: string; selected: boolean; title: string; desc: string; icon: React.ReactNode }) {
+function KeyModeCard({ value, selected, title, desc, icon }: { value: string; selected: boolean; title: string; desc: string; icon: React.ReactNode }) {
   return (
     <label
       htmlFor={`key-${value}`}

@@ -1,38 +1,37 @@
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { EXTRACTION_FIELDS } from "./pdfx";
 
 export interface ResultRow {
-  user_name: string;
+  user_name_display?: string | null;
+  user_name?: string | null;
   pdf_name: string;
   user_pdf_key: string;
-  parameter_1: string | null;
-  parameter_2: string | null;
-  parameter_3: string | null;
-  parameter_4: string | null;
-  parameter_5: string | null;
-  parameter_6: string | null;
-  parameter_7: string | null;
-  parameter_8: string | null;
-  parameter_9: string | null;
-  parameter_10: string | null;
-  parameter_11: string | null;
-  parameter_12: string | null;
-  parameter_13: string | null;
+  selected_model?: string | null;
   status: string;
   created_at: string;
+  // 13 extraction fields (snake_case columns).
+  [k: string]: any;
 }
 
 const HEADERS = [
-  "User Name", "PDF Name", "PDF Key",
-  ...Array.from({ length: 13 }, (_, i) => `Parameter ${i + 1}`),
-  "Status", "Created",
+  "User",
+  "PDF Name",
+  "PDF Key",
+  "Model",
+  ...EXTRACTION_FIELDS.map((f) => f.label),
+  "Status",
+  "Created",
 ];
 
 function rowToArray(r: ResultRow): string[] {
   return [
-    r.user_name, r.pdf_name, r.user_pdf_key,
-    ...Array.from({ length: 13 }, (_, i) => (r as any)[`parameter_${i + 1}`] ?? ""),
+    r.user_name_display ?? r.user_name ?? "",
+    r.pdf_name,
+    r.user_pdf_key,
+    r.selected_model ?? "",
+    ...EXTRACTION_FIELDS.map((f) => (r[f.key] ?? "") as string),
     r.status,
     new Date(r.created_at).toLocaleString(),
   ];

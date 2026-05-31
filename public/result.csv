@@ -1,0 +1,11 @@
+Filename,Brand,Age,Step Therapy Requirements Documented in Policy,Number of Steps through Brands,Number of Steps through Generic,Step through-Phototherapy,TB Test required,Quantity Limits,Specialist Types,Initial Authorization Duration(in-months),Reauthorization Duration(in-months),Reauthorization Required,Reauthorization Requirements Documented in Policy,Access Score
+aetna_humira_2024.pdf,Humira,18+,"Yes — must try 2 preferred agents first",2,1,Required prior to biologic,Yes,1 syringe / 14 days,Dermatologist or Rheumatologist,6,12,Yes,Documented clinical response required,7.5
+bcbs_skyrizi_2024.pdf,Skyrizi,18+,"Yes — must try 1 preferred biologic",1,1,Required if topical failed,Yes,1 syringe / 84 days,Dermatologist,6,12,Yes,Provider attestation of improvement,8.1
+cigna_dupixent_2024.pdf,Dupixent,12+,"Yes — must try 2 topicals",2,2,Not required,No,2 syringes / 28 days,"Dermatologist, Allergist",6,12,Yes,Documented clinical response required,6.8
+uhc_taltz_2024.pdf,Taltz,18+,"Yes — single preferred agent required",1,0,Required prior to biologic,Yes — within 12 months,1 autoinjector / 28 days,"Dermatologist, Rheumatologist",6,12,Yes,Lab results within 30 days,7.2
+aetna_cosentyx_2024.pdf,Cosentyx,18+,"Yes — must try 2 preferred agents first",2,1,Required prior to biologic,Yes,2 syringes / 28 days,"Dermatologist, Rheumatologist",6,12,Yes,Documented clinical response required,7.0
+humana_otezla_2024.pdf,Otezla,18+,No documented step therapy,0,0,Not required,No,60 tablets / 30 days,Dermatologist,12,12,Yes,Provider attestation of improvement,8.4
+bcbs_enbrel_2024.pdf,Enbrel,4+,"Yes — must try methotrexate",1,1,Not required,Yes,4 syringes / 28 days,Rheumatologist,6,12,Yes,Documented clinical response required,6.9
+cigna_stelara_2024.pdf,Stelara,6+,"Yes — must try 1 preferred biologic",1,1,Required if topical failed,Yes,1 syringe / 84 days,Dermatologist or Gastroenterologist,6,12,Yes,Documented clinical response required,7.6
+uhc_tremfya_2024.pdf,Tremfya,18+,"Yes — must try 2 preferred agents first",2,1,Required prior to biologic,Yes,1 syringe / 56 days,Dermatologist,6,12,Yes,Provider attestation of improvement,7.3
+aetna_rinvoq_2024.pdf,Rinvoq,12+,"Yes — must try 1 JAK or biologic",1,1,Not required,Yes — within 12 months,30 tablets / 30 days,"Dermatologist, Rheumatologist, Gastroenterologist",6,12,Yes,Lab results within 30 days,6.5
