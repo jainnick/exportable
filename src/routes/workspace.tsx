@@ -14,6 +14,8 @@ import { PdfDropzone } from "@/components/pdfx/PdfDropzone";
 import { ProcessingTimeline } from "@/components/pdfx/ProcessingTimeline";
 import { ResultsTable } from "@/components/pdfx/ResultsTable";
 import { StatusBadge } from "@/components/pdfx/StatusBadge";
+import { HeaderNav } from "@/components/pdfx/HeaderNav";
+import { ProofCard } from "@/components/pdfx/ProofCard";
 import {
   clearSession, getSessionId, getUserName,
   GROQ_MODELS, makePdfKey, normalizeName,
@@ -83,11 +85,14 @@ function Workspace() {
     })();
   }, [userNameKey]);
 
+  // Stepper reflects ONLY the current active session — never historical recent extractions.
   const step: 0 | 1 | 2 | 3 = useMemo(() => {
-    if (results.length > 0 && !processing) return 3;
+    const hasCurrentRuns = runs.length > 0;
+    const allCurrentComplete = hasCurrentRuns && runs.every((r) => r.status === "complete");
+    if (allCurrentComplete && !processing) return 3;
     if (files.length === 0) return 1;
     return 2;
-  }, [files.length, results.length, processing]);
+  }, [files.length, runs, processing]);
 
   const canStart =
     files.length > 0 &&
@@ -204,17 +209,20 @@ function Workspace() {
   return (
     <main className="min-h-screen">
       <header className="border-b bg-card/70 backdrop-blur">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
             <img src={logo} alt="DocuExtract AI" className="h-10 w-10 rounded-xl shadow-md" />
-            <div>
+            <div className="min-w-0">
               <p className="font-semibold leading-tight">DocuExtract AI</p>
-              <p className="text-xs text-muted-foreground">Hi, {name}</p>
+              <p className="text-xs text-muted-foreground truncate">Hi, {name}</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={onLogout}>
-            <LogOut className="h-4 w-4" /> Switch user
-          </Button>
+          <div className="flex items-center gap-2">
+            <HeaderNav />
+            <Button variant="ghost" size="sm" onClick={onLogout}>
+              <LogOut className="h-4 w-4" /> Switch user
+            </Button>
+          </div>
         </div>
       </header>
 
