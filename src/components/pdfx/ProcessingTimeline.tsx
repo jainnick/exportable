@@ -17,7 +17,8 @@ export function ProcessingTimeline({
   pdfName,
   status,
   error,
-}: { pdfName: string; status: RunStatus; error?: string | null }) {
+  progress,
+}: { pdfName: string; status: RunStatus; error?: string | null; progress?: string | null }) {
   const idx = ORDER[status];
   const failed = status === "failed";
 
@@ -53,6 +54,9 @@ export function ProcessingTimeline({
           );
         })}
       </ol>
+      {progress && !failed && status !== "complete" && (
+        <p className="mt-3 text-xs text-muted-foreground">{progress}</p>
+      )}
       {failed && error && (
         <p className="mt-3 text-xs text-destructive">{error}</p>
       )}

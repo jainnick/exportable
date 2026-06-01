@@ -22,6 +22,7 @@ import {
   type ApiKeyMode, type GroqModel, type RunStatus,
 } from "@/lib/pdfx";
 import { processPdf } from "@/lib/process-pdf";
+import { BRANDS, ACCURACY_MODES, type Brand, type AccuracyMode } from "@/lib/replit-api";
 import { supabase } from "@/integrations/supabase/client";
 import type { ResultRow } from "@/lib/exports";
 
@@ -41,6 +42,7 @@ interface RunItem {
   pdfKey: string;
   status: RunStatus;
   error?: string | null;
+  progress?: string | null;
 }
 
 function Workspace() {
@@ -52,6 +54,8 @@ function Workspace() {
   const [files, setFiles] = useState<File[]>([]);
   const [model, setModel] = useState<GroqModel>("llama-3.1-8b-instant");
   const [provider] = useState<"groq">("groq");
+  const [brand, setBrand] = useState<Brand>("STELARA");
+  const [accuracyMode, setAccuracyMode] = useState<AccuracyMode>("tier3");
   const [apiKeyMode, setApiKeyMode] = useState<ApiKeyMode>("app");
   const [ownKey, setOwnKey] = useState("");
   const [runs, setRuns] = useState<RunItem[]>([]);
@@ -154,6 +158,10 @@ function Workspace() {
           model,
           apiKeyMode,
           ownApiKey: apiKeyMode === "own" ? ownKey : undefined,
+          file: run.file,
+          brand,
+          accuracyMode,
+          onProgress: (msg) => updateRun(run.id, { progress: msg }),
         });
 
         updateRun(run.id, { status: "saving" });
@@ -272,6 +280,31 @@ function Workspace() {
               </div>
             </div>
 
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Brand</Label>
+                <Select value={brand} onValueChange={(v) => setBrand(v as Brand)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {BRANDS.map((b) => (
+                      <SelectItem key={b} value={b}>{b}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Accuracy mode</Label>
+                <Select value={accuracyMode} onValueChange={(v) => setAccuracyMode(v as AccuracyMode)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {ACCURACY_MODES.map((m) => (
+                      <SelectItem key={m} value={m}>{m}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div>
               <Label className="mb-2 block">3. API key</Label>
               <RadioGroup
@@ -325,7 +358,7 @@ function Workspace() {
               ) : (
                 <div className="space-y-3">
                   {runs.map((r) => (
-                    <ProcessingTimeline key={r.id} pdfName={r.file.name} status={r.status} error={r.error} />
+                    <ProcessingTimeline key={r.id} pdfName={r.file.name} status={r.status} error={r.error} progress={r.progress} />
                   ))}
                 </div>
               )}
