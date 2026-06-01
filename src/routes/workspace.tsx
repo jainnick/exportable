@@ -280,6 +280,31 @@ function Workspace() {
               </div>
             </div>
 
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Brand</Label>
+                <Select value={brand} onValueChange={(v) => setBrand(v as Brand)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {BRANDS.map((b) => (
+                      <SelectItem key={b} value={b}>{b}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Accuracy mode</Label>
+                <Select value={accuracyMode} onValueChange={(v) => setAccuracyMode(v as AccuracyMode)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {ACCURACY_MODES.map((m) => (
+                      <SelectItem key={m} value={m}>{m}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div>
               <Label className="mb-2 block">3. API key</Label>
               <RadioGroup
