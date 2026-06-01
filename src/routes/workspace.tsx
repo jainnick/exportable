@@ -358,7 +358,7 @@ function Workspace() {
               ) : (
                 <div className="space-y-3">
                   {runs.map((r) => (
-                    <ProcessingTimeline key={r.id} pdfName={r.file.name} status={r.status} error={r.error} />
+                    <ProcessingTimeline key={r.id} pdfName={r.file.name} status={r.status} error={r.error} progress={r.progress} />
                   ))}
                 </div>
               )}
