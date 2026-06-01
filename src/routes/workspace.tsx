@@ -54,6 +54,8 @@ function Workspace() {
   const [files, setFiles] = useState<File[]>([]);
   const [model, setModel] = useState<GroqModel>("llama-3.1-8b-instant");
   const [provider] = useState<"groq">("groq");
+  const [brand, setBrand] = useState<Brand>("STELARA");
+  const [accuracyMode, setAccuracyMode] = useState<AccuracyMode>("tier3");
   const [apiKeyMode, setApiKeyMode] = useState<ApiKeyMode>("app");
   const [ownKey, setOwnKey] = useState("");
   const [runs, setRuns] = useState<RunItem[]>([]);
