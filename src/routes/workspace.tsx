@@ -158,6 +158,10 @@ function Workspace() {
           model,
           apiKeyMode,
           ownApiKey: apiKeyMode === "own" ? ownKey : undefined,
+          file: run.file,
+          brand,
+          accuracyMode,
+          onProgress: (msg) => updateRun(run.id, { progress: msg }),
         });
 
         updateRun(run.id, { status: "saving" });
