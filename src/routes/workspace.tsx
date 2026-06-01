@@ -42,6 +42,7 @@ interface RunItem {
   pdfKey: string;
   status: RunStatus;
   error?: string | null;
+  progress?: string | null;
 }
 
 function Workspace() {
