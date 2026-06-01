@@ -54,6 +54,9 @@ export function ProcessingTimeline({
           );
         })}
       </ol>
+      {progress && !failed && status !== "complete" && (
+        <p className="mt-3 text-xs text-muted-foreground">{progress}</p>
+      )}
       {failed && error && (
         <p className="mt-3 text-xs text-destructive">{error}</p>
       )}
