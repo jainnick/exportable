@@ -17,7 +17,8 @@ export function ProcessingTimeline({
   pdfName,
   status,
   error,
-}: { pdfName: string; status: RunStatus; error?: string | null }) {
+  progress,
+}: { pdfName: string; status: RunStatus; error?: string | null; progress?: string | null }) {
   const idx = ORDER[status];
   const failed = status === "failed";
 
