@@ -22,6 +22,7 @@ import {
   type ApiKeyMode, type GroqModel, type RunStatus,
 } from "@/lib/pdfx";
 import { processPdf } from "@/lib/process-pdf";
+import { BRANDS, ACCURACY_MODES, type Brand, type AccuracyMode } from "@/lib/replit-api";
 import { supabase } from "@/integrations/supabase/client";
 import type { ResultRow } from "@/lib/exports";
 
