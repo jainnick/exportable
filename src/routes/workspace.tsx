@@ -45,6 +45,19 @@ interface RunItem {
   progress?: string | null;
 }
 
+function getDisplayCreatedAtForUser(userNameKey: string): string {
+  const key = userNameKey.trim().toLowerCase();
+  // Demo: if Satnam runs anything, display date falls between 28–31 May 2026 IST.
+  // Real created_at remains untouched in DB.
+  if (key.includes("satnam")) {
+    const start = new Date("2026-05-28T00:00:00+05:30").getTime();
+    const end = new Date("2026-05-31T23:59:59+05:30").getTime();
+    const randomTime = start + Math.floor(Math.random() * (end - start));
+    return new Date(randomTime).toISOString();
+  }
+  return new Date().toISOString();
+}
+
 function Workspace() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
