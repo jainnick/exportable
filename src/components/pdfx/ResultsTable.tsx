@@ -71,6 +71,28 @@ export function ResultsTable({ rows, currentUserNameKey = "", onProcessMore }: P
           </div>
         </div>
 
+        <div className="flex flex-wrap gap-2 mb-3">
+          <Button
+            type="button"
+            size="sm"
+            variant={recordScope === "all" ? "default" : "outline"}
+            onClick={() => setRecordScope("all")}
+            className={recordScope === "all" ? "gradient-bg text-primary-foreground" : ""}
+          >
+            All records
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={recordScope === "mine" ? "default" : "outline"}
+            onClick={() => setRecordScope("mine")}
+            className={recordScope === "mine" ? "gradient-bg text-primary-foreground" : ""}
+            disabled={!currentUserNameKey}
+          >
+            My records
+          </Button>
+        </div>
+
         <div className="flex flex-col gap-2 sm:flex-row mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
