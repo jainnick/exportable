@@ -168,7 +168,7 @@ export function ResultsTable({ rows, currentUserNameKey = "", onProcessMore }: P
                       </Td>
                     ))}
                     <Td><StatusBadge status={r.status} /></Td>
-                    <Td className="text-muted-foreground whitespace-nowrap">{new Date(r.created_at).toLocaleString()}</Td>
+                    <Td className="text-muted-foreground whitespace-nowrap">{new Date(r.display_created_at ?? r.created_at).toLocaleString()}</Td>
                   </tr>
                 ))}
               </tbody>
