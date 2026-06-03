@@ -6,11 +6,13 @@ import { EXTRACTION_FIELDS } from "./pdfx";
 export interface ResultRow {
   user_name_display?: string | null;
   user_name?: string | null;
+  user_name_key?: string | null;
   pdf_name: string;
   user_pdf_key: string;
   selected_model?: string | null;
   status: string;
   created_at: string;
+  display_created_at?: string | null;
   // 13 extraction fields (snake_case columns).
   [k: string]: any;
 }
@@ -25,6 +27,10 @@ const HEADERS = [
   "Created",
 ];
 
+function getDisplayDate(r: ResultRow): string {
+  return new Date(r.display_created_at ?? r.created_at).toLocaleString();
+}
+
 function rowToArray(r: ResultRow): string[] {
   return [
     r.user_name_display ?? r.user_name ?? "",
@@ -33,7 +39,7 @@ function rowToArray(r: ResultRow): string[] {
     r.selected_model ?? "",
     ...EXTRACTION_FIELDS.map((f) => (r[f.key] ?? "") as string),
     r.status,
-    new Date(r.created_at).toLocaleString(),
+    getDisplayDate(r),
   ];
 }
 
