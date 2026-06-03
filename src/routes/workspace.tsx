@@ -167,6 +167,8 @@ function Workspace() {
           .upload(path, run.file, { contentType: "application/pdf", upsert: false });
         if (upErr) throw new Error(upErr.message);
 
+        const displayCreatedAt = getDisplayCreatedAtForUser(userNameKey);
+
         const { data: runRow, error: runErr } = await supabase
           .from("document_runs")
           .insert({
@@ -178,6 +180,7 @@ function Workspace() {
             model_name: model,
             api_key_mode: apiKeyMode,
             status: "extracting",
+            display_created_at: displayCreatedAt,
           })
           .select("id")
           .single();
@@ -213,6 +216,7 @@ function Workspace() {
           selected_model: model,
           api_key_mode: apiKeyMode,
           status: "complete",
+          display_created_at: displayCreatedAt,
           raw_response: raw_response as any,
           ...fields,
         };
@@ -229,9 +233,13 @@ function Workspace() {
 
         const newRow: ResultRow = {
           ...insertRow,
-          created_at: new Date().toISOString(),
+          created_at: displayCreatedAt,
+          display_created_at: displayCreatedAt,
         };
-        setResults((prev) => [newRow, ...prev]);
+        setResults((prev) => {
+          if (prev.some((r) => r.user_pdf_key === newRow.user_pdf_key)) return prev;
+          return [newRow, ...prev];
+        });
       } catch (err: any) {
         console.error(err);
         updateRun(run.id, { status: "failed", error: err?.message ?? "Something went wrong" });
