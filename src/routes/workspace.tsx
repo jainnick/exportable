@@ -443,7 +443,7 @@ function Workspace() {
           </section>
         </div>
 
-        <ResultsTable rows={results} onProcessMore={onProcessMore} />
+        <ResultsTable rows={results} currentUserNameKey={userNameKey} onProcessMore={onProcessMore} />
       </div>
     </main>
   );
