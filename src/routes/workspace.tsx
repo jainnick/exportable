@@ -74,19 +74,42 @@ function Workspace() {
     setSessionIdState(getSessionId());
   }, [navigate]);
 
-  // Load historical results scoped to the user (not just this session).
+  // Load shared historical results (visible to everyone).
   useEffect(() => {
     if (!userNameKey) return;
     (async () => {
       const { data, error } = await supabase
         .from("extraction_results")
         .select("*")
-        .eq("user_name_key", userNameKey)
+        .order("display_created_at", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false })
-        .limit(200);
+        .limit(500);
       if (!error && data) setResults(data as ResultRow[]);
+      else setResults([]);
       setLoadingHistory(false);
     })();
+  }, [userNameKey]);
+
+  // Realtime: surface new extractions across all users.
+  useEffect(() => {
+    if (!userNameKey) return;
+    const channel = supabase
+      .channel("public-extraction-results")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "extraction_results" },
+        (payload) => {
+          const incoming = payload.new as ResultRow;
+          setResults((prev) => {
+            if (prev.some((r) => r.user_pdf_key === incoming.user_pdf_key)) return prev;
+            return [incoming, ...prev];
+          });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [userNameKey]);
 
   // Stepper reflects ONLY the current active session — never historical recent extractions.
