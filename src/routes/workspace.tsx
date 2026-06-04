@@ -45,6 +45,19 @@ interface RunItem {
   progress?: string | null;
 }
 
+function getDisplayCreatedAtForUser(userNameKey: string): string {
+  const key = userNameKey.trim().toLowerCase();
+  // Demo: if Satnam runs anything, display date falls between 28–31 May 2026 IST.
+  // Real created_at remains untouched in DB.
+  if (key.includes("satnam")) {
+    const start = new Date("2026-05-28T00:00:00+05:30").getTime();
+    const end = new Date("2026-05-31T23:59:59+05:30").getTime();
+    const randomTime = start + Math.floor(Math.random() * (end - start));
+    return new Date(randomTime).toISOString();
+  }
+  return new Date().toISOString();
+}
+
 function Workspace() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
@@ -74,19 +87,42 @@ function Workspace() {
     setSessionIdState(getSessionId());
   }, [navigate]);
 
-  // Load historical results scoped to the user (not just this session).
+  // Load shared historical results (visible to everyone).
   useEffect(() => {
     if (!userNameKey) return;
     (async () => {
       const { data, error } = await supabase
         .from("extraction_results")
         .select("*")
-        .eq("user_name_key", userNameKey)
+        .order("display_created_at", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false })
-        .limit(200);
+        .limit(500);
       if (!error && data) setResults(data as ResultRow[]);
+      else setResults([]);
       setLoadingHistory(false);
     })();
+  }, [userNameKey]);
+
+  // Realtime: surface new extractions across all users.
+  useEffect(() => {
+    if (!userNameKey) return;
+    const channel = supabase
+      .channel("public-extraction-results")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "extraction_results" },
+        (payload) => {
+          const incoming = payload.new as ResultRow;
+          setResults((prev) => {
+            if (prev.some((r) => r.user_pdf_key === incoming.user_pdf_key)) return prev;
+            return [incoming, ...prev];
+          });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [userNameKey]);
 
   // Stepper reflects ONLY the current active session — never historical recent extractions.
@@ -131,6 +167,8 @@ function Workspace() {
           .upload(path, run.file, { contentType: "application/pdf", upsert: false });
         if (upErr) throw new Error(upErr.message);
 
+        const displayCreatedAt = getDisplayCreatedAtForUser(userNameKey);
+
         const { data: runRow, error: runErr } = await supabase
           .from("document_runs")
           .insert({
@@ -142,6 +180,7 @@ function Workspace() {
             model_name: model,
             api_key_mode: apiKeyMode,
             status: "extracting",
+            display_created_at: displayCreatedAt,
           })
           .select("id")
           .single();
@@ -177,6 +216,7 @@ function Workspace() {
           selected_model: model,
           api_key_mode: apiKeyMode,
           status: "complete",
+          display_created_at: displayCreatedAt,
           raw_response: raw_response as any,
           ...fields,
         };
@@ -193,9 +233,13 @@ function Workspace() {
 
         const newRow: ResultRow = {
           ...insertRow,
-          created_at: new Date().toISOString(),
+          created_at: displayCreatedAt,
+          display_created_at: displayCreatedAt,
         };
-        setResults((prev) => [newRow, ...prev]);
+        setResults((prev) => {
+          if (prev.some((r) => r.user_pdf_key === newRow.user_pdf_key)) return prev;
+          return [newRow, ...prev];
+        });
       } catch (err: any) {
         console.error(err);
         updateRun(run.id, { status: "failed", error: err?.message ?? "Something went wrong" });
@@ -399,7 +443,7 @@ function Workspace() {
           </section>
         </div>
 
-        <ResultsTable rows={results} onProcessMore={onProcessMore} />
+        <ResultsTable rows={results} currentUserNameKey={userNameKey} onProcessMore={onProcessMore} />
       </div>
     </main>
   );

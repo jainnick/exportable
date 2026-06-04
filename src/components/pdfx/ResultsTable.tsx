@@ -10,13 +10,15 @@ import { EXTRACTION_FIELDS } from "@/lib/pdfx";
 
 interface Props {
   rows: ResultRow[];
+  currentUserNameKey?: string;
   onProcessMore?: () => void;
 }
 
-export function ResultsTable({ rows, onProcessMore }: Props) {
+export function ResultsTable({ rows, currentUserNameKey = "", onProcessMore }: Props) {
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [userFilter, setUserFilter] = useState<string>("all");
+  const [recordScope, setRecordScope] = useState<"all" | "mine">("all");
 
   const uniqueUsers = useMemo(() => {
     const set = new Set<string>();
@@ -28,7 +30,12 @@ export function ResultsTable({ rows, onProcessMore }: Props) {
   }, [rows]);
 
   const filtered = useMemo(() => {
+    const myKey = currentUserNameKey.trim().toLowerCase();
     return rows.filter((r) => {
+      if (recordScope === "mine") {
+        const rowUserKey = String(r.user_name_key ?? "").trim().toLowerCase();
+        if (!myKey || rowUserKey !== myKey) return false;
+      }
       if (statusFilter !== "all" && r.status !== statusFilter) return false;
       const userLabel = r.user_name_display ?? r.user_name ?? "";
       if (userFilter !== "all" && userLabel !== userFilter) return false;
@@ -36,7 +43,7 @@ export function ResultsTable({ rows, onProcessMore }: Props) {
       const hay = `${userLabel} ${r.pdf_name} ${r.user_pdf_key}`.toLowerCase();
       return hay.includes(q.toLowerCase());
     });
-  }, [rows, q, statusFilter, userFilter]);
+  }, [rows, q, statusFilter, userFilter, recordScope, currentUserNameKey]);
 
   return (
     <TooltipProvider delayDuration={150}>
@@ -62,6 +69,28 @@ export function ResultsTable({ rows, onProcessMore }: Props) {
               </Button>
             )}
           </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 mb-3">
+          <Button
+            type="button"
+            size="sm"
+            variant={recordScope === "all" ? "default" : "outline"}
+            onClick={() => setRecordScope("all")}
+            className={recordScope === "all" ? "gradient-bg text-primary-foreground" : ""}
+          >
+            All records
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={recordScope === "mine" ? "default" : "outline"}
+            onClick={() => setRecordScope("mine")}
+            className={recordScope === "mine" ? "gradient-bg text-primary-foreground" : ""}
+            disabled={!currentUserNameKey}
+          >
+            My records
+          </Button>
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row mb-4">
@@ -139,7 +168,7 @@ export function ResultsTable({ rows, onProcessMore }: Props) {
                       </Td>
                     ))}
                     <Td><StatusBadge status={r.status} /></Td>
-                    <Td className="text-muted-foreground whitespace-nowrap">{new Date(r.created_at).toLocaleString()}</Td>
+                    <Td className="text-muted-foreground whitespace-nowrap">{new Date(r.display_created_at ?? r.created_at).toLocaleString()}</Td>
                   </tr>
                 ))}
               </tbody>

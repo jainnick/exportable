@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           api_key_mode: string
           created_at: string
+          display_created_at: string | null
           id: string
           model_name: string
           model_provider: string
@@ -30,6 +31,7 @@ export type Database = {
         Insert: {
           api_key_mode: string
           created_at?: string
+          display_created_at?: string | null
           id?: string
           model_name: string
           model_provider?: string
@@ -42,6 +44,7 @@ export type Database = {
         Update: {
           api_key_mode?: string
           created_at?: string
+          display_created_at?: string | null
           id?: string
           model_name?: string
           model_provider?: string
@@ -59,6 +62,7 @@ export type Database = {
           age: string | null
           api_key_mode: string | null
           created_at: string
+          display_created_at: string | null
           id: string
           initial_authorization_duration_in_months: string | null
           number_of_steps_through_brands: string | null
@@ -101,6 +105,7 @@ export type Database = {
           age?: string | null
           api_key_mode?: string | null
           created_at?: string
+          display_created_at?: string | null
           id?: string
           initial_authorization_duration_in_months?: string | null
           number_of_steps_through_brands?: string | null
@@ -143,6 +148,7 @@ export type Database = {
           age?: string | null
           api_key_mode?: string | null
           created_at?: string
+          display_created_at?: string | null
           id?: string
           initial_authorization_duration_in_months?: string | null
           number_of_steps_through_brands?: string | null
