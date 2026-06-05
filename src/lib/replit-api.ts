@@ -66,13 +66,21 @@ export async function uploadPdf(opts: {
   brand: Brand;
   accuracyMode?: AccuracyMode;
   userName?: string;
+  model?: string;
+  groqApiKeys?: string;
+  sessionId?: string;
 }): Promise<string> {
   const formData = new FormData();
   formData.append("file", opts.file);
   formData.append("brand", opts.brand);
+  formData.append("model", opts.model || "llama-3.3-70b-versatile");
   formData.append("accuracy_mode", opts.accuracyMode || "tier3");
-  if (opts.userName) {
-    formData.append("session_id", `${opts.userName}-${Date.now()}`);
+  if (opts.groqApiKeys && opts.groqApiKeys.trim()) {
+    formData.append("groq_api_keys", opts.groqApiKeys.trim());
+  }
+  const sessionId = opts.sessionId || (opts.userName ? `${opts.userName}-${Date.now()}` : undefined);
+  if (sessionId) {
+    formData.append("session_id", sessionId);
   }
 
   // NOTE: do NOT set Content-Type — the browser sets the multipart boundary.

@@ -30,6 +30,9 @@ export async function processPdf(payload: ProcessPdfPayload): Promise<ProcessPdf
     brand: payload.brand,
     accuracyMode: payload.accuracyMode,
     userName: payload.userNameDisplay,
+    model: payload.model,
+    groqApiKeys: payload.apiKeyMode === "own" ? payload.ownApiKey : undefined,
+    sessionId: payload.sessionId,
   });
 
   payload.onProgress?.("Processing PDF… this may take 30–90 seconds.");
